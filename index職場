@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>線上求籤 | 職場心靈隨想</title>
+    <style>
+        :root {
+            --bg-color: #f7f6f2;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --text-primary: #2b2b2b;
+            --text-secondary: #6e6e73;
+            --accent-color: #d4a373;
+            --accent-hover: #bc8a5f;
+            --accent-light: #fefae0;
+            --border-color: #e6e1d6;
+            --shadow: 0 12px 32px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang TC", "Microsoft JhengHei", sans-serif;
+            background: linear-gradient(135deg, #f7f6f2 0%, #eef0eb 100%);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        #app {
+            width: 100%;
+            max-width: 440px;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 24px;
+        }
+
+        .icon-symbol {
+            font-size: 38px;
+            margin-bottom: 8px;
+            display: inline-block;
+            opacity: 0.9;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            margin: 0 0 6px 0;
+            color: var(--text-primary);
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+        }
+
+        .panel {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 32px 24px;
+            box-shadow: var(--shadow);
+        }
+
+        /* 籤筒區域 */
+        #stickArea {
+            height: 180px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        #stickCup {
+            width: 110px;
+            height: 150px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 50px;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.02), 0 8px 20px rgba(0, 0, 0, 0.04);
+        }
+
+        .shaking {
+            animation: gentleShake 0.2s infinite;
+        }
+
+        @keyframes gentleShake {
+            0% { transform: rotate(-5deg) translateY(-2px); }
+            50% { transform: rotate(5deg) translateY(2px); }
+            100% { transform: rotate(-5deg) translateY(-2px); }
+        }
+
+        #drawnStick {
+            display: none;
+            width: 90px;
+            height: 160px;
+            padding-top: 25px;
+            background: #ffffff;
+            border: 1px solid var(--accent-color);
+            border-radius: 16px;
+            color: var(--text-primary);
+            font-size: 20px;
+            font-weight: 500;
+            line-height: 1.5;
+            box-shadow: 0 10px 25px rgba(212, 163, 115, 0.2);
+        }
+
+        /* 狀態文字 */
+        #status {
+            min-height: 54px;
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin: 16px 0 24px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 按鈕風格 */
+        button {
+            width: 100%;
+            border: none;
+            border-radius: 14px;
+            padding: 14px 20px;
+            background: var(--accent-color);
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(212, 163, 115, 0.3);
+        }
+
+        button:hover {
+            background: var(--accent-hover);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* 擲杯區 */
+        #cupArea {
+            display: none;
+        }
+
+        .tag-info {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        #currentStick {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        #progress {
+            margin: 12px 0 20px 0;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        #progress span {
+            color: var(--accent-color);
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        #cups {
+            font-size: 54px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 10px 0;
+        }
+
+        .cupAnimation {
+            animation: cupFloat 0.2s infinite;
+        }
+
+        @keyframes cupFloat {
+            0% { transform: translateY(-4px) rotate(-8deg); }
+            50% { transform: translateY(4px) rotate(8deg); }
+            100% { transform: translateY(-4px) rotate(-8deg); }
+        }
+
+        #cupResult {
+            min-height: 48px;
+            font-size: 15px;
+            line-height: 1.5;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        /* 籤詩面板 */
+        #poem {
+            display: none;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        #poemTitle {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+        }
+
+        #poemText {
+            color: var(--text-primary);
+            font-size: 18px;
+            line-height: 2;
+            letter-spacing: 2px;
+            background: #ffffff;
+            padding: 24px 16px;
+            border-radius: 16px;
+            border: 1px dashed var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        #meaning {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.8;
+            text-align: left;
+            background: var(--accent-light);
+            padding: 16px 20px;
+            border-radius: 14px;
+        }
+
+        /* 工具 */
+        .hidden {
+            display: none !important;
+        }
+
+        #restartButton {
+            margin-top: 16px;
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            box-shadow: none;
+        }
+
+        #restartButton:hover {
+            background: rgba(0, 0, 0, 0.03);
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="app">
+
+        <div class="header">
+            <div class="icon-symbol">🍃</div>
+            <h1>心靈籤所</h1>
+            <div class="subtitle">沈靜心思 · 誠心抽籤 · 靜候指引</div>
+        </div>
+
+        <div class="panel">
+
+            <!-- 抽籤區域 -->
+            <div id="drawArea">
+                <div id="stickArea">
+                    <div id="stickCup">🎋</div>
+                    <div id="drawnStick"></div>
+                </div>
+
+                <div id="status">
+                    請先深呼吸，靜下心來<br>默念您心中的疑問。
+                </div>
+
+                <button id="startButton">開始求籤</button>
+            </div>
+
+            <!-- 擲杯區域 -->
+            <div id="cupArea">
+                <div class="tag-info">
+                    目前抽出：<span id="currentStick"></span>
+                </div>
+
+                <div id="progress">
+                    聖杯數：<span id="holyCount">0</span> / 3
+                </div>
+
+                <div id="cups">🪙 🪙</div>
+
+                <div id="cupResult">準備擲第一杯</div>
+
+                <button id="throwButton">擲第一杯</button>
+            </div>
+
+            <!-- 籤詩內容 -->
+            <div id="poem">
+                <h2 id="poemTitle"></h2>
+                <div id="poemText"></div>
+                <div id="meaning"></div>
+            </div>
+
+            <button id="restartButton" class="hidden">再次求籤</button>
+
+        </div>
+
+    </div>
+
+    <script>
+        /* 完整六十甲子傳統籤詩 + 職場幽默解籤資料庫 */
+        const allPoems = [
+            {
+                number: 1,
+                title: "甲子籤",
+                text: "日出便見風雲散，\n光明清淨照世間。\n一事何須催緊促，\n月出光輝得自由。",
+                meaning: "💡 **靈籤指引：** 雲開見日之象。PM 或主管又在催進度了？放心，時機到了問題自然會解決。現在急也沒用，先去泡杯咖啡或去廁所避難，下班前事情自會大白。"
+            },
+            {
+                number: 2,
+                title: "甲寅籤",
+                text: "於今此景正當時，\n看看欲吐百花魁。\n若能伸得東風力，\n應許便提雙手歸。",
+                meaning: "🚀 **靈籤指引：** 運勢正旺！你的專案或提案準備大放異彩。若能借到隔壁部門或大老闆的東風（甩鍋/讚聲），這次升官加薪或拿獎金的機率極高。"
+            },
+            {
+                number: 3,
+                title: "甲辰籤",
+                text: "勸君把定心莫虛，\n天生物資自有時。\n富貴由天莫苦求，\n男兒未濟且吟詩。",
+                meaning: "🧘 **靈籤指引：** 穩住，別慌！不要被 KPI 嚇到腳軟。命裡有時終須有，沒加到薪也不是你的錯。今天適合低調摸魚、吟詩作樂（滑手機），等風頭過去。"
+            },
+            {
+                number: 4,
+                title: "甲午籤",
+                text: "風浪漸漸息，\n重舟轉安銳。\n欲求財寶進，\n主獲百事宜。",
+                meaning: "💰 **靈籤指引：** 職場風暴終於平息！之前搞砸的案子或修不完的 Bug 已經順利過關。接下來財運不錯，適合去爭取預算或今天點外賣多加一顆蛋。"
+            },
+            {
+                number: 5,
+                title: "甲申籤",
+                text: "隻身去浪掀，\n合得貴人扶。\n若問前程事，\n花開百客都。",
+                meaning: "🤝 **靈籤指引：** 單槍匹馬去開會很可怕，但別擔心，現場會有貴人（幫忙說話的同事或心軟的客戶）跳出來救你。保持微笑，好運在後頭。"
+            },
+            {
+                number: 6,
+                title: "甲戌籤",
+                text: "風浪未曾休，\n欲行需謹厚。\n若問心中事，\n無虞自可求。",
+                meaning: "⚠️ **靈籤指引：** 辦公室現在風向不對，高層正在角力。這時候切記「低調沉穩」，不要隨便在 Slack 或 Line 群組發表高見，保住飯碗要緊。"
+            },
+            {
+                number: 7,
+                title: "乙丑籤",
+                text: "雲開月出正分明，\n不須進退問前程。\n婚姻皆由天註定，\n官事消散極太平。",
+                meaning: "🌤️ **靈籤指引：** 局勢已經非常明朗。不需要再糾結要不要離職或跳槽了，答案你自己心裡有數。糾紛會自動散去，準備享受久違的和平下班時間。"
+            },
+            {
+                number: 8,
+                title: "乙卯籤",
+                text: "禾稻看看結成完，\n此事必然兩相全。\n回到家中寬心坐，\n妻兒鼓舞樂團圓。",
+                meaning: "🎉 **靈籤指引：** 收割成果的時候到了！專案順利結案，獎金指日可待。今天時間一到請果斷關電腦回家，放鬆享受屬於你的私人時光。"
+            },
+            {
+                number: 9,
+                title: "乙巳籤",
+                text: "纖雲四卷天邊淨，\n月照長空萬里明。\n險路已經平坦去，\n莫教尤怨自心生。",
+                meaning: "🍵 **靈籤指引：** 最慘的期末考（客戶稽核/大案審查）已經過去了。不要再抱怨前陣子加班有多累，放下怨念，好好清空你的收件箱吧。"
+            },
+            {
+                number: 10,
+                title: "乙未籤",
+                text: "花開今已結成實，\n富貴榮華終自至。\n君子小人相會合，\n歡高快樂酒一杯。",
+                meaning: "🍻 **靈籤指引：** 成果豐碩！雖然過程中遇到不少機車客戶跟討厭小人，但看在成果（和薪水）份上，今晚適合跟同事去 Happy Hour 喝一杯解怨氣。"
+            },
+            {
+                number: 11,
+                title: "乙酉籤",
+                text: "靈雞漸漸報天曉，\n萬事清吉皆自好。\n此去必有貴人相，\n捷報頻傳一路高。",
+                meaning: "🐔 **靈籤指引：** 曙光初現！長期的努力終於被高層看見。接下來求職、面試、績效考核都會傳來好消息，貴人就在你身邊。"
+            },
+            {
+                number: 12,
+                title: "乙亥籤",
+                text: "長江風浪漸漸靜，\n于今得進可安行。\n必有貴人相助力，\n切莫疑慮自退縮。",
+                meaning: "🌊 **靈籤指引：** 風平浪靜。之前被退件的提案現在可以重新送審了。不要膽怯退縮，這次有主管會幫你背書，勇敢提倡你的想法！"
+            },
+            {
+                number: 13,
+                title: "丙子籤",
+                text: "命中必然官星照，\n何必憂心自焦躁。\n貴人指引在前途，\n加官進爵好時光。",
+                meaning: "👑 **靈籤指引：** 官星高照！你的職涯氣場正強。不用焦慮自己的能力不夠，這次的升遷或核心專案非你莫屬，準備迎接職涯新高峰。"
+            },
+            {
+                number: 14,
+                title: "丙寅籤",
+                text: "財中漸漸見分明，\n花開葉茂自然成。\n若得貴人提攜引，\n富貴榮華享太平。",
+                meaning: "💸 **靈籤指引：** 財運漸入佳境！論功行賞的時間到了。只要平時做人不要太失敗，貴人自然會幫你在老闆面前美言幾句，獎金穩穩入口袋。"
+            },
+            {
+                number: 15,
+                title: "丙辰籤",
+                text: "八百孤寒歲月長，\n一朝顯達姓名香。\n利名雙收皆順利，\n何須苦苦問陰陽。",
+                meaning: "🌟 **靈籤指引：** 苦盡甘來！熬了這麼久的底層社畜生活，終於要一戰成名了。你的技術或專業將會被大家認可，不需要再懷疑自己的價值。"
+            },
+            {
+                number: 16,
+                title: "丙午籤",
+                text: "不須作福不須求，\n用盡心機總未休。\n陽世不知陰世事，\n官法如爐不自由。",
+                meaning: "🛑 **靈籤指引：** 稍微停一下！不要太過算計或硬要甩鍋。高層的政策隨時在變（官法如爐），算得太精反而容易踩到紅線，順其自然最好。"
+            },
+            {
+                number: 17,
+                title: "丙申籤",
+                text: "舊恨重重未改為，\n家貧子宵苦思維。\n若得貴人扶持引，\n莫教舊事再縈懷。",
+                meaning: "🔄 **靈籤指引：** 過去的 Bug 或傳播的職場八卦就讓它過去吧。不要一直卡在舊的失誤裡自責，找到願意帶你的前輩/貴人，重新出發。"
+            },
+            {
+                number: 18,
+                title: "丙戌籤",
+                text: "君今庚甲未亨通，\n且向江頭作釣翁。\n玉兔月中笙歌響，\n自然有福至家中。",
+                meaning: "🎣 **靈籤指引：** 目前時運未到，強求無用。不如學釣魚翁「優雅摸魚」，把手邊基礎工作做完就好，等中秋或年末自然會有好消息降臨。"
+            },
+            {
+                number: 19,
+                title: "丁丑籤",
+                text: "富貴由命天註定，\n心險理亂總虛爭。\n不如守分勤耕耘，\n福祿自來萬事興。",
+                meaning: "🌾 **靈籤指引：** 職場內鬥勝負早已註定，搶來搶去最後也是一場空。腳踏實地做好自己的本分，不參與辦公室派系鬥爭，反而能笑到最後。"
+            },
+            {
+                number: 20,
+                title: "丁卯籤",
+                text: "前途功名未可期，\n莫將求託強為之。\n營謀用盡心機苦，\n不如安分守舊時。",
+                meaning: "🧱 **靈籤指引：** 現在不是跳槽或創業的好時機。拜託關係或硬擠進不適合的部門只會更累。安分留在現職累積實力，勝過盲目折騰。"
+            },
+            {
+                number: 21,
+                title: "丁巳籤",
+                text: "十方佛法有靈通，\n大難禍患盡皆空。\n若得貴人相引薦，\n事業興隆萬事通。",
+                meaning: "✨ **靈籤指引：** 大吉之籤！職場上的大災難（如系統崩潰、重大失誤）會奇蹟般化解。如果有朋友要幫你介紹新工作或獵頭找上門，千萬別錯過。"
+            },
+            {
+                number: 22,
+                title: "丁未籤",
+                text: "太公家業八十成，\n月出光輝得自由。\n若得貴人相提攜，\n前程萬里福無疆。",
+                meaning: "🐢 **靈籤指引：** 姜太公八十歲才大器晚成，你現在急什麼？職涯是長跑，慢慢累積經驗。只要關鍵貴人出現，你的前途將一片光明。"
+            },
+            {
+                number: 23,
+                title: "丁酉籤",
+                text: "欲去長江浪滾滾，\n不意回頭漸安平。\n若得貴人指引處，\n前途光明利名成。",
+                meaning: "↩️ **靈籤指引：** 看到專案水太深、風浪太大，及時撤退或「轉身甩鍋」並不羞恥。聽從前輩的建議改換方向，反而能化險為夷。"
+            },
+            {
+                number: 24,
+                title: "丁亥籤",
+                text: "月出光輝四海明，\n前途順利任君行。\n貴人指引無疑慮，\n富貴榮華自此生。",
+                meaning: "🌕 **靈籤指引：** 前途一片光明！提案、發佈會、績效評比都會非常順利。放膽去做，這段時間你的任何決策幾乎都是正確的。"
+            },
+            {
+                number: 25,
+                title: "戊子籤",
+                text: "總是前途莫心疑，\n求名求利自相宜。\n若得貴人提攜處，\n歡天喜地樂無期。",
+                meaning: "😄 **靈籤指引：** 不要再懷疑自己的能力了！不論是要求加薪還是爭取新職位，現在都是好時機。好好展現成果，準備迎接好結果。"
+            },
+            {
+                number: 26,
+                title: "戊寅籤",
+                text: "選出牡丹第一枝，\n勸君折履莫遲疑。\n世間富貴誰能及，\n好景光陰在正時。",
+                meaning: "🌸 **靈籤指引：** 好機會就像盛開的牡丹，稍縱即逝！有好的跳槽機會或好專案出現時，切記「果斷搶下」，不要猶豫不決而被同事搶走。"
+            },
+            {
+                number: 27,
+                title: "戊辰籤",
+                text: "君爾何須問聖娘，\n虎頭蛇尾自驚忙。\n寬心守分隨緣過，\n莫把憂愁掛心腸。",
+                meaning: "🐯 **靈籤指引：** 每次都是開局雄心壯志，最後虎頭蛇尾？別再給自己訂立做不到的 KPI 了。放寬心，能順利交差下班就是最好的狀態。"
+            },
+            {
+                number: 28,
+                title: "戊午籤",
+                text: "於今此景正當時，\n看看欲吐百花魁。\n若能伸得東風力，\n應許便提雙手歸。",
+                meaning: "🌺 **靈籤指引：** 你的潛力即將爆發！善用團隊資源與跨部門協助（東風），這個專案完成後，收穫最豐厚的就是你。"
+            },
+            {
+                number: 29,
+                title: "戊申籤",
+                text: "枯木逢春再發芽，\n風雲際會展光華。\n事業從今多順利，\n何須苦苦問陰陽。",
+                meaning: "🌱 **靈籤指引：** 枯木逢春！原本以為死掉的專案或被冰封的部門突然獲得重用。準備好展現你的實力，壞運氣已經徹底結束了。"
+            },
+            {
+                number: 30,
+                title: "戊戌籤",
+                text: "漸漸求得見分明，\n不須進退問前程。\n若得貴人相指引，\n自然福至慶平安。",
+                meaning: "☕ **靈籤指引：** 混亂的局勢正在漸漸釐清。不需要一直跟同事探聽消息，按部就班做好份內工作，自然能平平安安度過考驗。"
+            },
+            {
+                number: 31,
+                title: "己丑籤",
+                text: "福如東海壽如山，\n君爾何須自不安。\n命裏有時終須有，\n何須苦苦問神仙。",
+                meaning: "🧘 **靈籤指引：** 你的職場底氣其實很足，不用每天疑神疑鬼怕被裁員。該是你的加薪與權利少不了，放輕鬆，多注意自己的健康吧。"
+            },
+            {
+                number: 32,
+                title: "己卯籤",
+                text: "龍虎相交在正時，\n求名求利兩相宜。\n若得貴人提攜引，\n前程萬里福無疆。",
+                meaning: "🐉 **靈籤指引：** 龍虎交會，充滿挑戰但也充滿機遇！職場角力正熱烈，只要站對陣營並獲得長官提攜，升官發財就在此一舉。"
+            },
+            {
+                number: 33,
+                title: "己巳籤",
+                text: "欲去長江浪滾滾，\n不意回頭漸安平。\n若得貴人指引處，\n前途光明利名成。",
+                meaning: "🛡️ **靈籤指引：** 遇到難搞的客戶或無理的要求，先別硬碰硬。稍微退一步或請長官出面協調，問題就能迎刃而解。"
+            },
+            {
+                number: 34,
+                title: "己未籤",
+                text: "危險高山行過盡，\n莫將尤怨自心生。\n若得貴人提攜處，\n前途順利任君行。",
+                meaning: "🏔️ **靈籤指引：** 最難爬的那座高山（最艱難的時期）你已經走過來了！不要再抱怨過去加班有多慘，接下來的路會非常平坦順暢。"
+            },
+            {
+                number: 35,
+                title: "己酉籤",
+                text: "此事何須問陰陽，\n心中自有好主張。\n若能守得清規在，\n富貴榮華自此長。",
+                meaning: "🧠 **靈籤指引：** 這件事你自己心裡早就有最好的答案了，不需要再問別人。只要堅守職業道德與原則，你的專業會為你帶來長遠回報。"
+            },
+            {
+                number: 36,
+                title: "己亥籤",
+                text: "福如東海壽如山，\n君爾何須自不安。\n命裏有時終須有，\n何須苦苦問神仙。",
+                meaning: "🍵 **靈籤指引：** 再次提醒：薪水與職位命裡有時終須有。每天焦慮不會讓代碼少寫一行，不如喝杯好茶，維持好心情最重要。"
+            },
+            {
+                number: 37,
+                title: "庚子籤",
+                text: "運逢罷論此藝興，\n莫將成敗放心懷。\n若得貴人相指引，\n事業從今漸漸興。",
+                meaning: "🔄 **靈籤指引：** 舊的專案被砍掉了？別灰心！這正好讓你轉向更有潛力的新技術或新業務。不要在意一時成敗，轉機就在眼前。"
+            },
+            {
+                number: 38,
+                title: "庚寅籤",
+                text: "名顯意達出人群，\n前途順利任君行。\n若得貴人相指引，\n富貴榮華自此生。",
+                meaning: "🏆 **靈籤指引：** 突出重圍！你的傑出表現會在公司裡鶴立雞群。繼續保持這個節奏，升職、加薪、拿獎金通通難不倒你。"
+            },
+            {
+                number: 39,
+                title: "庚辰籤",
+                text: "意中若問神仙路，\n勸君把定心莫虛。\n若得貴人提攜處，\n前途光明利名成。",
+                meaning: "🧭 **靈籤指引：** 想尋求職涯神仙指路？其實你需要的是定力。不要被外面的高薪誘惑搞得心浮氣躁，找個好導師聊聊會更有方向。"
+            },
+            {
+                number: 40,
+                title: "庚午籤",
+                text: "平生富貴由天定，\n何須苦苦求神仙。\n若能守分勤耕耘，\n福祿自來萬事興。",
+                meaning: "💼 **靈籤指引：** 職涯發展自有定數。不要去羨慕別人天生會拍馬屁，你踏實做事的累積，最終會轉換成誰也拿不走硬實力。"
+            },
+            {
+                number: 41,
+                title: "庚申籤",
+                text: "今村許君多吉慶，\n莫將尤怨自心生。\n若得貴人提攜處，\n前途順利任君行。",
+                meaning: "🎁 **靈籤指引：** 喜報連連！之前的付出終於要有回報了（可能是意外的獎金或讚賞）。少點抱怨、多點笑容，好運會持續更久。"
+            },
+            {
+                number: 42,
+                title: "庚戌籤",
+                text: "一帆風順任君行，\n萬里前程福自生。\n若得貴人提攜處，\n歡天喜地樂無期。",
+                meaning: "⛵ **靈籤指引：** 大吉！一帆風順！這段時間做什麼都很順，寫 Code 沒 Bug、開會沒人酸、送審一次過。請把握機會大幅推進進度。"
+            },
+            {
+                number: 43,
+                title: "辛丑籤",
+                text: "一年作事急如飛，\n君爾何須苦自悲。\n若得貴人相指引，\n前途光明利名成。",
+                meaning: "⚡ **靈籤指引：** 忙碌了一整年，覺得自己像無頭蒼蠅？別悲觀！你的忙碌高層都有看在眼裡，成果很快就會浮現了。"
+            },
+            {
+                number: 44,
+                title: "辛卯籤",
+                text: "客到前途百事宜，\n若得貴人相指引。\n富貴榮華終自至，\n何須苦苦問陰陽。",
+                meaning: "🤝 **靈籤指引：** 外部合作或新客戶帶來的機會非常好！多參加產業交流或聚會，貴人就在這些新朋友之中。"
+            },
+            {
+                number: 45,
+                title: "辛巳籤",
+                text: "花開今已結成實，\n富貴榮華終自至。\n君子小人相會合，\n歡高快樂酒一杯。",
+                meaning: "🍇 **靈籤指引：** 辛苦耕耘的成果終於結實累累！職場上就算是對頭，今天也能握手言和。大家一起把餅做大，共享成果。"
+            },
+            {
+                number: 46,
+                title: "辛未籤",
+                text: "功名事業自相宜，\n莫將尤怨自心生。\n若得貴人相提攜，\n前途光明利名成。",
+                meaning: "📈 **靈籤指引：** 你的事業定位非常適合你，不要總是羨慕別人的行業。專注在自己的專業領域，貴人自然會出現幫你推一把。"
+            },
+            {
+                number: 47,
+                title: "辛酉籤",
+                text: "君爾何須問聖娘，\n虎頭蛇尾自驚忙。\n寬心守分隨緣過，\n莫把憂愁掛心腸。",
+                meaning: "⏰ **靈籤指引：** 不要給自己設定太過宏大的目標然後半途而廢。每天推進一點點，維持穩定的步調，比爆發式加班更有用。"
+            },
+            {
+                number: 48,
+                title: "辛亥籤",
+                text: "陽世不知陰世事，\n官法如爐不自由。\n勸君把定心莫虛，\n天生物資自有時。",
+                meaning: "⚖ **靈籤指引：** 公司的政策與高層人事變化莫測，不是你能控制的。做好自己能控制的部分，其他的就隨緣吧。"
+            },
+            {
+                number: 49,
+                title: "壬子籤",
+                text: "言語不通作事難，\n沉淪深海未得安。\n若得貴人相引薦，\n前途光明萬事通。",
+                meaning: "🗣️ **靈籤指引：** 最近溝通成本極高？跟跨部門總是話不投機？你需要一個能夠幫你翻譯「人話」與「專業術語」的中介貴人來破局。"
+            },
+            {
+                number: 50,
+                title: "壬寅籤",
+                text: "佛前發誓無異心，\n且看前途得好音。\n若得貴人相提攜，\n事業興隆萬事通。",
+                meaning: "🎯 **靈籤指引：** 既然已經立下專案目標，就專心貫徹到底。你的專注會換來好結果，主管也會全力支援你資源。"
+            },
+            {
+                number: 51,
+                title: "壬辰籤",
+                text: "東西南北不堪行，\n前途茫茫未見明。\n若得貴人相指引，\n自然福至慶平安。",
+                meaning: "🌫️ **靈籤指引：** 感覺現在去哪裡、換什麼工作都不對？茫然時「不動作」就是最好的動作。多請教前輩，等待大霧散去。"
+            },
+            {
+                number: 52,
+                title: "壬午籤",
+                text: "功名事業自相宜，\n何須苦苦求神仙。\n若能守分勤耕耘，\n福祿自來萬事興。",
+                meaning: "🌱 **靈籤指引：** 只要你把當下的工作做到 80 分，好運就會自然附贈。不用特地求神問卜，你的工作態度就是你最好的護身符。"
+            },
+            {
+                number: 53,
+                title: "壬申籤",
+                text: "看君作事轉傷神，\n臨陣退縮不英雄。\n若得貴人相提攜，\n前途光明利名成。",
+                meaning: "💪 **靈籤指引：** 看你做這件事傷神很久了。臨門一腳千萬不要退縮！硬著頭皮衝過去，後面會有團隊跟貴人幫你撐腰。"
+            },
+            {
+                number: 54,
+                title: "壬戌籤",
+                text: "孤燈寂寂夜沉沉，\n萬事遲疑未敢行。\n若得貴人相指引，\n前途光明利名成。",
+                meaning: "💡 **靈籤指引：** 一個人深夜加班寫企劃覺得很孤單？不要再猶豫不決了。明天把草案拿出來跟團隊討論，大家會給你關鍵點子。"
+            },
+            {
+                number: 55,
+                title: "癸丑籤",
+                text: "須知進退有時節，\n莫將成敗放心懷。\n若得貴人相指引，\n事業從今漸漸興。",
+                meaning: "⚖️ **靈籤指引：** 職場進退要有度。知道什麼時候該爭取、什麼時候該「優雅甩鍋」。看淡一時的成敗，職涯才能走得長久。"
+            },
+            {
+                number: 56,
+                title: "癸卯籤",
+                text: "病中若得苦心勞，\n到底完全總未遭。\n若得貴人相指引，\n前途光明利名成。",
+                meaning: "💊 **靈籤指引：** 身體是革命的本錢！最近是不是累壞了？工作永遠做不完，但身體壞了沒人賠。適度請假休息，效率反而更高。"
+            },
+            {
+                number: 57,
+                title: "癸巳籤",
+                text: "官事臨頭不用憂，\n勸君把定心莫虛。\n若得貴人相提攜，\n前途光明利名成。",
+                meaning: "🛡️ **靈籤指引：** 被客戶客訴或被高層質疑？穩住心神，準備好數據與證據。貴人（你的直屬主管）會站出來幫你擋子彈的。"
+            },
+            {
+                number: 58,
+                title: "癸未籤",
+                text: "選出牡丹第一枝，\n勸君折履莫遲疑。\n世間富貴誰能及，\n好景光陰在正時。",
+                meaning: "✨ **靈籤指引：** 上天給了你一個極佳的發揮舞台！不要害羞或推辭，當仁不讓接下這個任務，這將是你職涯代表作。"
+            },
+            {
+                number: 59,
+                title: "癸酉籤",
+                text: "有心作事總無成，\n沉淪深海未得安。\n若得貴人相引薦，\n前途光明萬事通。",
+                meaning: "🔑 **靈籤指引：** 覺得到處碰壁、出力不討好？可能是方法錯了或放錯位置。找個客觀的貴人幫你點出盲點，就能快速脫困。"
+            },
+            {
+                number: 60,
+                title: "癸亥籤",
+                text: "月出光輝四海明，\n前途順利任君行。\n貴人指引無疑慮，\n富貴榮華自此生。",
+                meaning: "🎊 **靈籤指引：** 60 籤大圓滿！功德圓滿，前途一片大光明。不論是職涯、薪水還是生活，都將迎來最順遂的時刻！"
+            }
+        ];
+
+        /* 變數宣告 */
+        let currentPoem = null;
+        let holyCount = 0;
+        let busy = false;
+
+        /* DOM 元素 */
+        const startButton = document.getElementById("startButton");
+        const throwButton = document.getElementById("throwButton");
+        const restartButton = document.getElementById("restartButton");
+        const stickCup = document.getElementById("stickCup");
+        const drawnStick = document.getElementById("drawnStick");
+        const drawArea = document.getElementById("drawArea");
+        const cupArea = document.getElementById("cupArea");
+        const status = document.getElementById("status");
+        const currentStick = document.getElementById("currentStick");
+        const holyCountText = document.getElementById("holyCount");
+        const cups = document.getElementById("cups");
+        const cupResult = document.getElementById("cupResult");
+        const poem = document.getElementById("poem");
+        const poemTitle = document.getElementById("poemTitle");
+        const poemText = document.getElementById("poemText");
+        const meaning = document.getElementById("meaning");
+
+        /* 開始求籤 */
+        startButton.addEventListener("click", startDraw);
+
+        function startDraw() {
+            if (busy) return;
+            busy = true;
+            startButton.disabled = true;
+            status.innerHTML = "正在為您專注求籤...";
+            stickCup.classList.add("shaking");
+
+            setTimeout(drawStick, 1800);
+        }
+
+        /* 抽籤 */
+        function drawStick() {
+            stickCup.classList.remove("shaking");
+            const index = Math.floor(Math.random() * allPoems.length);
+            currentPoem = allPoems[index];
+
+            stickCup.style.display = "none";
+            drawnStick.style.display = "block";
+            drawnStick.innerHTML = "第<br>" + currentPoem.number + "<br>籤";
+
+            status.innerHTML = "抽到 <strong>第 " + currentPoem.number + " 籤（" + currentPoem.title + "）</strong>";
+
+            setTimeout(beginCups, 1000);
+        }
+
+        /* 進入擲杯 */
+        function beginCups() {
+            drawArea.classList.add("hidden");
+            cupArea.style.display = "block";
+            holyCount = 0;
+            holyCountText.textContent = "0";
+            currentStick.textContent = "第 " + currentPoem.number + " 籤（" + currentPoem.title + "）";
+            cupResult.innerHTML = "請誠心擲第一杯";
+            throwButton.textContent = "擲第一杯";
+            throwButton.disabled = false;
+            cups.innerHTML = "🪙 🪙";
+            busy = false;
+        }
+
+        /* 擲杯動作 */
+        throwButton.addEventListener("click", throwCup);
+
+        function throwCup() {
+            if (busy) return;
+            busy = true;
+            throwButton.disabled = true;
+            cupResult.innerHTML = "擲杯中...";
+            cups.classList.add("cupAnimation");
+
+            setTimeout(finishCup, 900);
+        }
+
+        /* 判定擲杯結果 */
+        function finishCup() {
+            cups.classList.remove("cupAnimation");
+
+            /* 機率邏輯保留：80% 聖杯, 10% 笑杯, 10% 陰杯 */
+            const random = Math.random();
+            let result;
+
+            if (random < 0.80) {
+                result = "holy";
+            } else if (random < 0.90) {
+                result = "laugh";
+            } else {
+                result = "negative";
+            }
+
+            /* 聖杯 */
+            if (result === "holy") {
+                holyCount++;
+                cups.innerHTML = "🪙 🪙";
+                cupResult.innerHTML = "<span style='color:#52b788; font-weight:600;'>聖杯！</span>";
+                holyCountText.textContent = holyCount;
+
+                if (holyCount === 3) {
+                    cupResult.innerHTML = "<span style='color:#52b788; font-weight:600;'>連續三聖杯！</span><br>已獲得神明確認。";
+                    throwButton.disabled = true;
+                    setTimeout(confirmPoem, 1000);
+                    return;
+                }
+
+                throwButton.textContent = "擲第 " + (holyCount + 1) + " 杯";
+                throwButton.disabled = false;
+                busy = false;
+                return;
+            }
+
+            /* 笑杯 */
+            if (result === "laugh") {
+                cups.innerHTML = "🪙 😄 🪙";
+                cupResult.innerHTML = "<span style='color:#e9c46a; font-weight:600;'>笑杯</span><br>未獲確認，需重新求籤。";
+            } 
+            /* 陰杯 */
+            else {
+                cups.innerHTML = "🪙 🔴 🪙";
+                cupResult.innerHTML = "<span style='color:#e76f51; font-weight:600;'>陰杯</span><br>未獲確認，需重新求籤。";
+            }
+
+            setTimeout(failedDraw, 1500);
+        }
+
+        /* 求籤失敗重來 */
+        function failedDraw() {
+            cupArea.style.display = "none";
+            drawArea.classList.remove("hidden");
+            stickCup.style.display = "flex";
+            drawnStick.style.display = "none";
+            status.innerHTML = "這支籤未獲三聖杯確認。<br>請收拾心情，重新求籤。";
+            startButton.textContent = "重新求籤";
+            startButton.disabled = false;
+            cups.innerHTML = "🪙 🪙";
+            cupResult.innerHTML = "準備擲第一杯";
+            holyCount = 0;
+            holyCountText.textContent = "0";
+            busy = false;
+        }
+
+        /* 確認籤詩顯示 */
+        function confirmPoem() {
+            cupArea.style.display = "none";
+            poem.style.display = "block";
+            poemTitle.textContent = "第 " + currentPoem.number + " 籤 - " + currentPoem.title;
+            poemText.innerHTML = currentPoem.text.replace(/\n/g, "<br>");
+            meaning.innerHTML = currentPoem.meaning;
+
+            restartButton.classList.remove("hidden");
+            busy = false;
+        }
+
+        /* 重頭開始 */
+        restartButton.addEventListener("click", restartGame);
+
+        function restartGame() {
+            currentPoem = null;
+            holyCount = 0;
+            poem.style.display = "none";
+            restartButton.classList.add("hidden");
+            drawArea.classList.remove("hidden");
+            stickCup.style.display = "flex";
+            drawnStick.style.display = "none";
+            status.innerHTML = "請先深呼吸，靜下心來<br>默念您心中的疑問。";
+            startButton.textContent = "開始求籤";
+            startButton.disabled = false;
+            cups.innerHTML = "🪙 🪙";
+            cupResult.innerHTML = "準備擲第一杯";
+            holyCountText.textContent = "0";
+            busy = false;
+        }
+    </script>
+
+</body>
+
+</html>
