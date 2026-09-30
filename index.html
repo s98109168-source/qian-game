@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width,
+initial-scale=1.0,
+maximum-scale=1.0,
+user-scalable=no">
+
+<title>線上求籤</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+
+    font-family:
+        "Microsoft JhengHei",
+        Arial,
+        sans-serif;
+
+    background:
+        linear-gradient(
+            180deg,
+            #210803,
+            #661b08,
+            #160402
+        );
+
+    color: #fff4d0;
+}
+
+#app {
+    min-height: 100vh;
+    padding: 20px;
+    text-align: center;
+}
+
+.temple {
+    font-size: 70px;
+    margin-top: 10px;
+}
+
+h1 {
+    color: #ffd45c;
+    font-size: 36px;
+    margin: 5px 0;
+}
+
+.subtitle {
+    color: #ffdca0;
+    margin-bottom: 20px;
+}
+
+.panel {
+    width: 100%;
+    max-width: 500px;
+    margin: auto;
+
+    background:
+        rgba(20, 5, 2, 0.75);
+
+    border:
+        2px solid #d6a13a;
+
+    border-radius: 20px;
+
+    padding: 25px 20px;
+
+    box-shadow:
+        0 0 30px
+        rgba(255, 190, 60, 0.2);
+}
+
+
+/* =====================
+   籤筒
+===================== */
+
+#stickArea {
+    height: 250px;
+
+    display:
+        flex;
+
+    justify-content:
+        center;
+
+    align-items:
+        center;
+}
+
+#stickCup {
+
+    width: 150px;
+    height: 190px;
+
+    display:
+        flex;
+
+    justify-content:
+        center;
+
+    align-items:
+        center;
+
+    font-size: 70px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #6d2708,
+            #bd5318,
+            #6d2708
+        );
+
+    border:
+        4px solid #e0a83e;
+
+    border-radius:
+        15px 15px 35px 35px;
+
+    box-shadow:
+        0 0 25px
+        rgba(255, 200, 80, 0.4);
+}
+
+.shaking {
+    animation:
+        shake 0.15s infinite;
+}
+
+@keyframes shake {
+
+    0% {
+        transform:
+            rotate(-8deg);
+    }
+
+    50% {
+        transform:
+            rotate(8deg);
+    }
+
+    100% {
+        transform:
+            rotate(-8deg);
+    }
+}
+
+
+/* =====================
+   抽出的籤
+===================== */
+
+#drawnStick {
+
+    display: none;
+
+    width: 110px;
+    height: 220px;
+
+    padding-top: 30px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #8a4312,
+            #d89532,
+            #8a4312
+        );
+
+    border:
+        3px solid #ffd166;
+
+    border-radius:
+        10px 10px 30px 30px;
+
+    color:
+        #4b1d00;
+
+    font-size:
+        26px;
+
+    font-weight:
+        bold;
+
+    line-height:
+        1.4;
+
+    box-shadow:
+        0 0 30px
+        rgba(255, 200, 80, 0.5);
+}
+
+
+/* =====================
+   狀態文字
+===================== */
+
+#status {
+
+    min-height:
+        65px;
+
+    font-size:
+        21px;
+
+    line-height:
+        1.6;
+
+    margin:
+        15px 0;
+}
+
+
+/* =====================
+   按鈕
+===================== */
+
+button {
+
+    border: none;
+
+    border-radius: 12px;
+
+    padding:
+        15px 30px;
+
+    margin:
+        8px;
+
+    background:
+        linear-gradient(
+            #ffd96a,
+            #d99a27
+        );
+
+    color:
+        #421700;
+
+    font-size:
+        19px;
+
+    font-weight:
+        bold;
+
+    cursor:
+        pointer;
+
+    box-shadow:
+        0 5px 0 #82570d;
+}
+
+button:active {
+
+    transform:
+        translateY(4px);
+
+    box-shadow:
+        0 1px 0 #82570d;
+}
+
+button:disabled {
+
+    opacity:
+        0.6;
+
+    cursor:
+        not-allowed;
+}
+
+
+/* =====================
+   擲筊區
+===================== */
+
+#cupArea {
+    display: none;
+}
+
+#currentStick {
+
+    color:
+        #ffd166;
+
+    font-size:
+        25px;
+}
+
+#progress {
+
+    margin:
+        20px;
+
+    color:
+        #ffd166;
+
+    font-size:
+        23px;
+}
+
+#cups {
+
+    font-size:
+        70px;
+
+    min-height:
+        100px;
+
+    margin:
+        15px;
+}
+
+.cupAnimation {
+
+    animation:
+        cupShake
+        0.18s
+        infinite;
+}
+
+@keyframes cupShake {
+
+    0% {
+        transform:
+            rotate(-15deg);
+    }
+
+    50% {
+        transform:
+            rotate(15deg);
+    }
+
+    100% {
+        transform:
+            rotate(-15deg);
+    }
+}
+
+#cupResult {
+
+    min-height:
+        60px;
+
+    font-size:
+        22px;
+
+    line-height:
+        1.6;
+
+    margin:
+        15px;
+}
+
+
+/* =====================
+   籤詩
+===================== */
+
+#poem {
+
+    display:
+        none;
+
+    margin-top:
+        20px;
+
+    padding:
+        25px 20px;
+
+    background:
+        rgba(80, 25, 5, 0.8);
+
+    border:
+        2px solid #d9a441;
+
+    border-radius:
+        15px;
+}
+
+#poem h2 {
+
+    color:
+        #ffd166;
+}
+
+#poemText {
+
+    color:
+        #ffe6b0;
+
+    font-size:
+        24px;
+
+    line-height:
+        2;
+}
+
+#meaning {
+
+    color:
+        #ffdca8;
+
+    line-height:
+        1.8;
+}
+
+
+/* =====================
+   工具
+===================== */
+
+.hidden {
+    display: none !important;
+}
+
+
+/* =====================
+   手機
+===================== */
+
+@media (max-width: 600px) {
+
+    h1 {
+        font-size:
+            30px;
+    }
+
+    #cups {
+        font-size:
+            60px;
+    }
+
+    #poemText {
+        font-size:
+            21px;
+    }
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div id="app">
+
+
+    <div class="temple">
+        🏮
+    </div>
+
+
+    <h1>
+        🧧 線上求籤
+    </h1>
+
+
+    <div class="subtitle">
+        誠心祈求 · 抽籤 · 擲杯確認
+    </div>
+
+
+    <div class="panel">
+
+
+        <!-- =====================
+             抽籤
+        ====================== -->
+
+        <div id="drawArea">
+
+
+            <div id="stickArea">
+
+                <div id="stickCup">
+                    🎋
+                </div>
+
+                <div id="drawnStick">
+                </div>
+
+            </div>
+
+
+            <div id="status">
+
+                請先靜下心來，<br>
+                默念你想詢問的事情。
+
+            </div>
+
+
+            <button id="startButton">
+
+                🙏 開始求籤
+
+            </button>
+
+        </div>
+
+
+
+        <!-- =====================
+             擲筊
+        ====================== -->
+
+        <div id="cupArea">
+
+
+            <div>
+
+                已抽出：
+
+                <span id="currentStick">
+                </span>
+
+                <br><br>
+
+                請擲杯確認此籤。
+
+            </div>
+
+
+            <div id="progress">
+
+                聖杯：
+                <span id="holyCount">
+                    0
+                </span>
+                / 3
+
+            </div>
+
+
+            <div id="cups">
+
+                🪙 🪙
+
+            </div>
+
+
+            <div id="cupResult">
+
+                準備擲第一杯
+
+            </div>
+
+
+            <button id="throwButton">
+
+                🪙 擲第一杯
+
+            </button>
+
+        </div>
+
+
+
+        <!-- =====================
+             籤詩
+        ====================== -->
+
+        <div id="poem">
+
+
+            <h2 id="poemTitle">
+            </h2>
+
+
+            <div id="poemText">
+            </div>
+
+
+            <hr>
+
+
+            <div id="meaning">
+            </div>
+
+
+        </div>
+
+
+        <button
+        id="restartButton"
+        class="hidden">
+
+            🔄 再求一次
+
+        </button>
+
+
+    </div>
+
+</div>
+
+
+
+<script>
+
+
+/* ==================================================
+   60 支籤
+================================================== */
+
+const poems = [
+
+"雲開月出正分明，\n不須進退問前程。",
+"春風得意花千里，\n前途自有好消息。",
+"山重水複疑無路，\n柳暗花明又一村。",
+"守得雲開見月明，\n靜待時機自然成。",
+"一帆風順任君行，\n萬里前程福自生。",
+"花落花開春復來，\n莫將成敗放心懷。",
+"千里姻緣一線牽，\n有心終會得圓全。",
+"金鱗豈是池中物，\n一遇風雲便化龍。",
+"莫道前途無知己，\n貴人相助在其中。",
+"凡事莫急且從容，\n守正自然福氣隆。"
+
+];
+
+
+const meanings = [
+
+"事情逐漸明朗，保持耐心即可。",
+"適合積極行動，但仍需穩健。",
+"眼前雖有困難，仍可能出現轉機。",
+"不宜急躁，等待適當時機。",
+"事情進展順利，可以按照計畫前進。",
+"事情有起有落，不必因一時結果而灰心。",
+"人際與感情方面需要真誠溝通。",
+"把握機會，可能出現新的發展。",
+"可以尋求可靠的人協助。",
+"保持穩定，比急著求成更重要。"
+
+];
+
+
+/*
+   建立 60 支籤
+*/
+
+const allPoems = [];
+
+
+for (
+    let i = 0;
+    i < 60;
+    i++
+) {
+
+    allPoems.push({
+
+        number:
+            i + 1,
+
+        text:
+            poems[
+                i % poems.length
+            ],
+
+        meaning:
+            meanings[
+                i % meanings.length
+            ]
+
+    });
+
+}
+
+
+/* ==================================================
+   遊戲變數
+================================================== */
+
+let currentPoem = null;
+
+let holyCount = 0;
+
+let busy = false;
+
+
+/* ==================================================
+   元件
+================================================== */
+
+const startButton =
+    document.getElementById(
+        "startButton"
+    );
+
+const throwButton =
+    document.getElementById(
+        "throwButton"
+    );
+
+const restartButton =
+    document.getElementById(
+        "restartButton"
+    );
+
+const stickCup =
+    document.getElementById(
+        "stickCup"
+    );
+
+const drawnStick =
+    document.getElementById(
+        "drawnStick"
+    );
+
+const drawArea =
+    document.getElementById(
+        "drawArea"
+    );
+
+const cupArea =
+    document.getElementById(
+        "cupArea"
+    );
+
+const status =
+    document.getElementById(
+        "status"
+    );
+
+const currentStick =
+    document.getElementById(
+        "currentStick"
+    );
+
+const holyCountText =
+    document.getElementById(
+        "holyCount"
+    );
+
+const cups =
+    document.getElementById(
+        "cups"
+    );
+
+const cupResult =
+    document.getElementById(
+        "cupResult"
+    );
+
+const poem =
+    document.getElementById(
+        "poem"
+    );
+
+const poemTitle =
+    document.getElementById(
+        "poemTitle"
+    );
+
+const poemText =
+    document.getElementById(
+        "poemText"
+    );
+
+const meaning =
+    document.getElementById(
+        "meaning"
+    );
+
+
+/* ==================================================
+   開始求籤
+================================================== */
+
+startButton.addEventListener(
+    "click",
+    startDraw
+);
+
+
+function startDraw() {
+
+    if (busy) {
+        return;
+    }
+
+    busy = true;
+
+    startButton.disabled =
+        true;
+
+    status.innerHTML =
+        "🙏 正在誠心求籤...";
+
+    stickCup.classList.add(
+        "shaking"
+    );
+
+
+    setTimeout(
+        drawStick,
+        1800
+    );
+
+}
+
+
+/* ==================================================
+   抽籤
+================================================== */
+
+function drawStick() {
+
+    stickCup.classList.remove(
+        "shaking"
+    );
+
+
+    /*
+       隨機抽 1～60
+    */
+
+    const index =
+        Math.floor(
+            Math.random()
+            * allPoems.length
+        );
+
+
+    currentPoem =
+        allPoems[index];
+
+
+    stickCup.style.display =
+        "none";
+
+
+    drawnStick.style.display =
+        "block";
+
+
+    drawnStick.innerHTML =
+        "第<br>" +
+        currentPoem.number +
+        "<br>籤";
+
+
+    status.innerHTML =
+        "🎋 抽到 <strong>第 " +
+        currentPoem.number +
+        " 籤</strong>";
+
+
+    setTimeout(
+        beginCups,
+        1000
+    );
+
+}
+
+
+/* ==================================================
+   進入擲杯
+================================================== */
+
+function beginCups() {
+
+    drawArea.classList.add(
+        "hidden"
+    );
+
+
+    cupArea.style.display =
+        "block";
+
+
+    holyCount =
+        0;
+
+
+    holyCountText.textContent =
+        "0";
+
+
+    currentStick.textContent =
+        "第 " +
+        currentPoem.number +
+        " 籤";
+
+
+    cupResult.innerHTML =
+        "請誠心擲第一杯";
+
+
+    throwButton.textContent =
+        "🪙 擲第一杯";
+
+
+    throwButton.disabled =
+        false;
+
+
+    cups.innerHTML =
+        "🪙 🪙";
+
+
+    busy =
+        false;
+
+}
+
+
+/* ==================================================
+   按下擲杯
+================================================== */
+
+throwButton.addEventListener(
+    "click",
+    throwCup
+);
+
+
+function throwCup() {
+
+    /*
+       防止快速連續點擊
+    */
+
+    if (busy) {
+        return;
+    }
+
+
+    busy =
+        true;
+
+
+    throwButton.disabled =
+        true;
+
+
+    cupResult.innerHTML =
+        "🙏 擲杯中...";
+
+
+    cups.classList.add(
+        "cupAnimation"
+    );
+
+
+    setTimeout(
+        finishCup,
+        900
+    );
+
+}
+
+
+/* ==================================================
+   完成一次擲杯
+================================================== */
+
+function finishCup() {
+
+    cups.classList.remove(
+        "cupAnimation"
+    );
+
+
+    /*
+       ======================================
+       友善版擲杯機率
+       ======================================
+
+       🟢 聖杯 80%
+       🟡 笑杯 10%
+       🔴 陰杯 10%
+
+       必須連續三次聖杯才確認籤。
+    */
+
+    const random =
+        Math.random();
+
+
+    let result;
+
+
+    if (random < 0.80) {
+
+        result =
+            "holy";
+
+    }
+
+    else if (random < 0.90) {
+
+        result =
+            "laugh";
+
+    }
+
+    else {
+
+        result =
+            "negative";
+
+    }
+
+
+    /* =========================
+       聖杯
+    ========================= */
+
+    if (result === "holy") {
+
+        holyCount++;
+
+
+        cups.innerHTML =
+            "🪙 🪙";
+
+
+        cupResult.innerHTML =
+            "🟢 <strong>聖杯！</strong>";
+
+
+        holyCountText.textContent =
+            holyCount;
+
+
+        /*
+           三聖杯
+        */
+
+        if (
+            holyCount === 3
+        ) {
+
+            cupResult.innerHTML =
+                "🎉 <strong>三聖杯！</strong><br>" +
+                "這支籤已確認。";
+
+
+            throwButton.disabled =
+                true;
+
+
+            setTimeout(
+                confirmPoem,
+                1000
+            );
+
+
+            return;
+
+        }
+
+
+        /*
+           準備下一杯
+        */
+
+        throwButton.textContent =
+            "🪙 擲第 " +
+            (holyCount + 1) +
+            " 杯";
+
+
+        throwButton.disabled =
+            false;
+
+
+        busy =
+            false;
+
+
+        return;
+
+    }
+
+
+    /* =========================
+       笑杯
+    ========================= */
+
+    if (result === "laugh") {
+
+        cups.innerHTML =
+            "🪙 😄 🪙";
+
+
+        cupResult.innerHTML =
+            "🟡 <strong>笑杯</strong><br>" +
+            "這支籤未獲三聖杯確認。";
+
+    }
+
+
+    /* =========================
+       陰杯
+    ========================= */
+
+    else {
+
+        cups.innerHTML =
+            "🪙 🔴 🪙";
+
+
+        cupResult.innerHTML =
+            "🔴 <strong>陰杯</strong><br>" +
+            "這支籤未獲三聖杯確認。";
+
+    }
+
+
+    /*
+       失敗後重新抽籤
+    */
+
+    setTimeout(
+        failedDraw,
+        1500
+    );
+
+}
+
+
+/* ==================================================
+   這支籤失敗
+================================================== */
+
+function failedDraw() {
+
+    cupArea.style.display =
+        "none";
+
+
+    drawArea.classList.remove(
+        "hidden"
+    );
+
+
+    stickCup.style.display =
+        "flex";
+
+
+    drawnStick.style.display =
+        "none";
+
+
+    status.innerHTML =
+        "❌ 這支籤未獲三聖杯確認。<br>" +
+        "請重新抽籤。";
+
+
+    startButton.textContent =
+        "🎋 重新抽籤";
+
+
+    startButton.disabled =
+        false;
+
+
+    cups.innerHTML =
+        "🪙 🪙";
+
+
+    cupResult.innerHTML =
+        "準備擲第一杯";
+
+
+    holyCount =
+        0;
+
+
+    holyCountText.textContent =
+        "0";
+
+
+    busy =
+        false;
+
+}
+
+
+/* ==================================================
+   三聖杯成功
+================================================== */
+
+function confirmPoem() {
+
+    cupArea.style.display =
+        "none";
+
+
+    poem.style.display =
+        "block";
+
+
+    poemTitle.textContent =
+        "🎋 第 " +
+        currentPoem.number +
+        " 籤";
+
+
+    poemText.innerHTML =
+        currentPoem.text
+            .replace(
+                /\n/g,
+                "<br>"
+            );
+
+
+    meaning.innerHTML =
+        "📜 解籤：<br>" +
+        currentPoem.meaning;
+
+
+    restartButton.classList.remove(
+        "hidden"
+    );
+
+
+    busy =
+        false;
+
+}
+
+
+/* ==================================================
+   重新開始
+================================================== */
+
+restartButton.addEventListener(
+    "click",
+    restartGame
+);
+
+
+function restartGame() {
+
+    currentPoem =
+        null;
+
+
+    holyCount =
+        0;
+
+
+    poem.style.display =
+        "none";
+
+
+    restartButton.classList.add(
+        "hidden"
+    );
+
+
+    drawArea.classList.remove(
+        "hidden"
+    );
+
+
+    stickCup.style.display =
+        "flex";
+
+
+    drawnStick.style.display =
+        "none";
+
+
+    status.innerHTML =
+        "請先靜下心來，<br>" +
+        "默念你想詢問的事情。";
+
+
+    startButton.textContent =
+        "🙏 開始求籤";
+
+
+    startButton.disabled =
+        false;
+
+
+    cups.innerHTML =
+        "🪙 🪙";
+
+
+    cupResult.innerHTML =
+        "準備擲第一杯";
+
+
+    holyCountText.textContent =
+        "0";
+
+
+    busy =
+        false;
+
+}
+
+</script>
+
+</body>
+
+</html>
